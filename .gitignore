@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data and cache files
+data/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+*.jsonl
+*.log
+*.cache
+
+# Hummingbot specific
+conf/
+logs/
+*.yml
+!*.example.yml
+
+# Node modules
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Secrets
+.env
+*.key
+*.pem
+*_key
+*_secret
