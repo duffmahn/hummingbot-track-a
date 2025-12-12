@@ -18,7 +18,7 @@ def main():
 
     # Import harness
     try:
-        from agent_harness import AgentHarness
+        from lib.agent_harness import AgentHarness
     except ImportError as e:
         print(f"❌ Failed to import agent_harness: {e}")
         sys.exit(1)
