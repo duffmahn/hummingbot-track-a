@@ -39,6 +39,8 @@ jobs:
         python -m py_compile quants-lab/lib/smart_cache.py
         python -m py_compile quants-lab/schemas/contracts.py
         python -m py_compile quants-lab/phase5_learning_agent.py
+        python -m py_compile quants-lab/lib/agent_harness.py
+        python -m py_compile quants-lab/scripts/run_episode.py
         echo "✅ All syntax checks passed"
         
     - name: Verify cache-first architecture
@@ -64,11 +66,30 @@ jobs:
       run: |
         echo "=== Running 1-episode deterministic mock campaign ==="
         chmod +x start_training_campaign.sh
-        ./start_training_campaign.sh || {
-          echo "Campaign failed, checking for artifacts..."
+        
+        # Run campaign and capture output
+        ./start_training_campaign.sh 2>&1 | tee campaign_output.log
+        
+        # Check if campaign succeeded
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "❌ Campaign script failed"
+          echo "=== Last 50 lines of output ==="
+          tail -50 campaign_output.log
+          echo "=== Checking for run directory ==="
           ls -la data/runs/ 2>/dev/null || echo "No runs directory"
+          if [ -d "data/runs" ]; then
+            LATEST_RUN=$(ls -td data/runs/run_* 2>/dev/null | head -1)
+            if [ -n "$LATEST_RUN" ]; then
+              echo "=== Contents of $LATEST_RUN ==="
+              ls -la "$LATEST_RUN/"
+              if [ -f "$LATEST_RUN/campaign.log" ]; then
+                echo "=== Campaign log (last 30 lines) ==="
+                tail -30 "$LATEST_RUN/campaign.log"
+              fi
+            fi
+          fi
           exit 1
-        }
+        fi
         
     - name: Verify artifacts exist
       run: |
@@ -85,7 +106,20 @@ jobs:
         fi
         
         echo "✅ Found run: $LATEST_RUN"
-        ls -la "$LATEST_RUN/episodes/" || echo "No episodes directory"
+        
+        if [ ! -d "$LATEST_RUN/episodes" ]; then
+          echo "❌ No episodes directory in $LATEST_RUN"
+          echo "=== Run directory contents ==="
+          ls -la "$LATEST_RUN/"
+          if [ -f "$LATEST_RUN/campaign.log" ]; then
+            echo "=== Campaign log (last 50 lines) ==="
+            tail -50 "$LATEST_RUN/campaign.log"
+          fi
+          exit 1
+        fi
+        
+        echo "✅ Episodes directory exists"
+        ls -la "$LATEST_RUN/episodes/" || echo "Episodes directory empty"
         
     - name: Run integration tests
       env:
@@ -93,12 +127,7 @@ jobs:
       run: |
         echo "=== Running CI integration test ==="
         cd quants-lab
-        pytest -v tests/test_ci_integration.py || {
-          echo "Integration test failed"
-          echo "Listing run directories:"
-          ls -la ../data/runs/ 2>/dev/null || echo "No runs found"
-          exit 1
-        }
+        pytest -v tests/test_ci_integration.py
         
     - name: Upload artifacts on failure
       if: failure()
@@ -107,4 +136,5 @@ jobs:
         name: test-artifacts
         path: |
           data/runs/
+          campaign_output.log
         retention-days: 7
