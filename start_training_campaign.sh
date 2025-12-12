@@ -12,14 +12,14 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 EPISODES="${EPISODES:-30}"
 START_EPISODE="${START_EPISODE:-1}"
-SLEEP_BETWEEN_EPISODES="${SLEEP_BETWEEN_EPISODES:-1}"
+SLEEP_BETWEEN_EPISODES="${SLEP_BETWEEN_EPISODES:-1}"
 
 # Track A: New directory structure
 DATA_DIR="${DATA_DIR:-$SCRIPT_DIR/data}"
 RUNS_DIR="$DATA_DIR/runs"
 
 AGENT_SCRIPT="${AGENT_SCRIPT:-$SCRIPT_DIR/quants-lab/phase5_learning_agent.py}"
-HARNESS_BRIDGE="${HARNESS_BRIDGE:-$SCRIPT_DIR/scripts/run_episode.py}"
+HARNESS_BRIDGE="${HARNESS_BRIDGE:-$SCRIPT_DIR/quants-lab/scripts/run_episode.py}"
 
 ENV_FILE="${ENV_FILE:-$SCRIPT_DIR/.env}"
 
