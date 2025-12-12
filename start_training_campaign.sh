@@ -281,3 +281,7 @@ echo
 log "🏆 Campaign Complete!"
 log "📌 Campaign log: $CAMPAIGN_LOG"
 log "📁 Run directory: $RUN_DIR"
+
+# Generate metrics
+log "📊 Generating metrics..."
+"$VENV_PY" "$SCRIPT_DIR/quants-lab/scripts/build_run_metrics.py" --run-id "$RUN_ID" || log "⚠️  Metrics generation failed (non-fatal)"
