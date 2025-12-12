@@ -122,6 +122,15 @@ jobs:
         echo "✅ Episodes directory exists"
         ls -la "$LATEST_RUN/episodes/" || echo "Episodes directory empty"
         
+        # Show episode contents for debugging
+        LATEST_EP=$(ls -td "$LATEST_RUN/episodes/ep_*" 2>/dev/null | head -1)
+        if [ -n "$LATEST_EP" ]; then
+          echo "=== Episode directory contents ==="
+          ls -la "$LATEST_EP/"
+          echo "=== Campaign log (last 100 lines) ==="
+          tail -100 "$LATEST_RUN/campaign.log"
+        fi
+        
     - name: Run integration tests
       env:
         PYTHONPATH: "${{ github.workspace }}"
