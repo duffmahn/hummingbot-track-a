@@ -15,7 +15,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        submodules: false  # Don't initialize submodules
+        submodules: false
         
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -41,15 +41,14 @@ jobs:
         python -m py_compile quants-lab/phase5_learning_agent.py
         echo "✅ All syntax checks passed"
         
-    - name: Run unit tests (if any)
+    - name: Verify cache-first architecture
       run: |
-        echo "=== Running pytest ==="
-        cd quants-lab
-        if [ -d "tests" ] && [ "$(ls -A tests/*.py 2>/dev/null)" ]; then
-          pytest -v tests/ -k "not test_ci_integration" || echo "⚠️  Some tests may require setup"
-        else
-          echo "No unit tests found, skipping"
+        echo "=== Verifying no blocking Dune calls ==="
+        if grep -n "self\.dune\.get_" quants-lab/lib/market_intel.py; then
+          echo "❌ Found blocking Dune calls!"
+          exit 1
         fi
+        echo "✅ Cache-first architecture verified"
         
     - name: Run deterministic mock campaign
       env:
@@ -61,16 +60,45 @@ jobs:
         HB_SEED: "12345"
         EPISODES: "1"
         PYTHONUNBUFFERED: "1"
+        PYTHONPATH: "${{ github.workspace }}"
       run: |
         echo "=== Running 1-episode deterministic mock campaign ==="
         chmod +x start_training_campaign.sh
-        ./start_training_campaign.sh
+        ./start_training_campaign.sh || {
+          echo "Campaign failed, checking for artifacts..."
+          ls -la data/runs/ 2>/dev/null || echo "No runs directory"
+          exit 1
+        }
         
-    - name: Verify artifacts
+    - name: Verify artifacts exist
+      run: |
+        echo "=== Checking for run artifacts ==="
+        if [ ! -d "data/runs" ]; then
+          echo "❌ No data/runs directory created"
+          exit 1
+        fi
+        
+        LATEST_RUN=$(ls -td data/runs/run_* 2>/dev/null | head -1)
+        if [ -z "$LATEST_RUN" ]; then
+          echo "❌ No run directory found"
+          exit 1
+        fi
+        
+        echo "✅ Found run: $LATEST_RUN"
+        ls -la "$LATEST_RUN/episodes/" || echo "No episodes directory"
+        
+    - name: Run integration tests
+      env:
+        PYTHONPATH: "${{ github.workspace }}"
       run: |
         echo "=== Running CI integration test ==="
         cd quants-lab
-        pytest -v tests/test_ci_integration.py
+        pytest -v tests/test_ci_integration.py || {
+          echo "Integration test failed"
+          echo "Listing run directories:"
+          ls -la ../data/runs/ 2>/dev/null || echo "No runs found"
+          exit 1
+        }
         
     - name: Upload artifacts on failure
       if: failure()
