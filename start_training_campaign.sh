@@ -215,6 +215,10 @@ for ((i=START_EPISODE; i<=EPISODES; i++)); do
     log "⚠️  ENV file not found at $ENV_FILE (continuing without it)"
   fi
 
+  # Temporarily disable unbound variable check for agent/harness execution
+  # (CI environment may have different variable availability)
+  set +u
+
   # 1) Agent: Learn & Propose
   log "🤖 Agent thinking..."
   "$VENV_PY" "$AGENT_SCRIPT" --episode-id "$EPISODE_ID"
@@ -234,6 +238,7 @@ for ((i=START_EPISODE; i<=EPISODES; i++)); do
       --config-hash "unknown" \
       --agent-version "v6.0_track_a"
     
+    set -u  # Re-enable unbound variable check
     continue
   fi
   
@@ -259,9 +264,12 @@ for ((i=START_EPISODE; i<=EPISODES; i++)); do
   fi
 
   # 2) Run Harness / Episode Runner
-  log "🏃 Harness running via $HARNESS_BRIDGE..."
+  log "🏃 Harness running via "$HARNESS_BRIDGE"..."
   "$VENV_PY" "$HARNESS_BRIDGE" --episode-id "$EPISODE_ID"
   HARNESS_EXIT=$?
+  
+  # Re-enable unbound variable check
+  set -u
 
   EP_END_EPOCH="$(date +%s)"
   EP_END_HUMAN="$(date +"%Y-%m-%d %H:%M:%S")"
