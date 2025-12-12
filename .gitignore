@@ -12,6 +12,7 @@ build/
 venv/
 env/
 ENV/
+.venv/
 
 # IDE
 .vscode/
@@ -35,6 +36,7 @@ conf/
 logs/
 *.yml
 !*.example.yml
+!.github/**/*.yml
 
 # Node modules
 node_modules/
@@ -54,3 +56,11 @@ Thumbs.db
 *.pem
 *_key
 *_secret
+
+# Embedded repositories (submodules)
+hummingbot/
+hummingbot_gateway/
+hummingbot_dashboard/
+hummingbot_deploy/
+hummingbot_mcp/
+claude_desktop_builder/
