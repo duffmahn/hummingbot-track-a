@@ -26,14 +26,24 @@ class MockCLMMClient:
     
     def pool_info(self, chain: str, network: str, connector: str, pool_address: str) -> Dict[str, Any]:
         """Mock pool info."""
+        tick_spacing = 60
+        
+        # Generate random tick and snap to spacing
+        raw_tick = self.rng.randint(-887272, 887272)
+        tick = int(round(raw_tick / tick_spacing) * tick_spacing)
+        
+        # Compute sqrtPriceX96 from tick for consistency
+        # sqrt(1.0001^tick) * 2^96
+        sqrt_price_x96 = int((1.0001 ** (tick / 2)) * (2 ** 96))
+        
         data = {
             "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",  # WETH
             "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # USDC
             "fee": "3000",
-            "tickSpacing": 60,
+            "tickSpacing": tick_spacing,
             "liquidity": str(self.rng.randint(1000000, 10000000)),
-            "sqrtPriceX96": str(self.rng.randint(2**95, 2**96)),
-            "tick": self.rng.randint(-887272, 887272)
+            "sqrtPriceX96": str(sqrt_price_x96),
+            "tick": tick
         }
         return self._mock_response(data)
     

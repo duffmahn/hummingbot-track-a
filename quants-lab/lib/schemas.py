@@ -80,9 +80,23 @@ class EpisodeResult(BaseModel):
     gas_cost_usd: float = 0.0
     out_of_range_pct: Optional[float] = None
     rebalance_count: int = 0
+    
+    # Fee Validation Metrics
+    fees_0: Optional[float] = None
+    fees_1: Optional[float] = None
+    pool_fees_usd_input_based: Optional[float] = None
+    pool_fees_usd_amount_usd_based: Optional[float] = None
 
     position_before: Optional[Dict[str, Any]] = None
     position_after: Optional[Dict[str, Any]] = None
+    
+    # ✅ DELIVERABLE B: Baseline comparisons and alpha metrics
+    baselines: Optional[Dict[str, Dict[str, Any]]] = None
+    best_baseline_name: Optional[str] = None
+    alpha_usd: Optional[float] = None
+    alpha_vs: Optional[str] = None
+    alpha_per_100k_vol: Optional[float] = None
+    alpha_per_gas_usd: Optional[float] = None
 
     error: Optional[str] = None
     errors: List[str] = Field(default_factory=list)

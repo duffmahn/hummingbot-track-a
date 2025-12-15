@@ -134,3 +134,9 @@ class EpisodeResult(BaseModel):
     
     # Reward (Calculated post-execution)
     reward: Optional[RewardBreakdown] = None
+
+    # --- Fee Validation Metrics ---
+    fees_0: Optional[float] = None
+    fees_1: Optional[float] = None
+    pool_fees_usd_input_based: Optional[float] = None
+    pool_fees_usd_amount_usd_based: Optional[float] = None

@@ -1,0 +1,128 @@
+🔍 Analyzing run: aggressive_tuning_20251214_130419
+📁 Run directory: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251214_130419
+📁 Found 100 episodes in aggressive_tuning_20251214_130419
+✅ Successfully loaded 100 episodes
+
+✅ Saved JSON: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251214_130419/metrics_summary.json
+✅ Saved report: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251214_130419/metrics_summary.txt
+
+================================================================================
+ABSOLUTE RETURN ANALYSIS - aggressive_tuning_20251214_130419
+================================================================================
+
+📊 OVERALL SUMMARY
+--------------------------------------------------------------------------------
+Episodes: 100
+Total Net PnL: $-4.30
+  = PnL $-2.30 - Gas $2.00
+Mean Net PnL/Episode: $-0.04
+Median Net PnL/Episode: $-0.00
+
+Actions: Hold=99, Rebalance=1, Widen=0
+Gas Saved vs Always-Rebalance: $198.00
+
+
+💼 BY ACTION
+--------------------------------------------------------------------------------
+
+HOLD (99 episodes):
+  Mean Net PnL: $-0.00
+  Hit Rate: 0.0%
+  Mean Gas: $0.00
+
+REBALANCE (1 episodes):
+  Mean Net PnL: $-4.00
+  Hit Rate: 0.0%
+  Mean Gas: $2.00
+
+
+🌍 BY REGIME × ACTION
+--------------------------------------------------------------------------------
+
+jumpy / hold (10 episodes):
+  Mean Net PnL: $-0.00
+  Hit Rate: 0.0%
+
+mean_revert / hold (50 episodes):
+  Mean Net PnL: $-0.00
+  Hit Rate: 0.0%
+
+mean_revert / rebalance (1 episodes):
+  Mean Net PnL: $-4.00
+  Hit Rate: 0.0%
+
+trend_up / hold (39 episodes):
+  Mean Net PnL: $-0.00
+  Hit Rate: 0.0%
+
+
+🏆 BASELINE COMPARISON
+--------------------------------------------------------------------------------
+Best Overall: baseline_hold
+
+baseline_hold:
+  Total Net PnL: $1034.89
+  Mean Net PnL: $10.35
+
+baseline_medium:
+  Total Net PnL: $-1210.39
+  Mean Net PnL: $-12.10
+
+baseline_tight:
+  Total Net PnL: $-3267.51
+  Mean Net PnL: $-32.68
+
+baseline_wide:
+  Total Net PnL: $786.89
+  Mean Net PnL: $7.87
+
+
+💸 REGRET ANALYSIS
+--------------------------------------------------------------------------------
+Total Regret: $1039.19
+Mean Regret/Episode: $10.39
+
+Top 10 Regret Episodes:
+  1. ep_aggressive_tuning_20251214_130419_49: $93.40
+     mean_revert/hold: agent=$-0.00, baseline_hold=$93.40
+  2. ep_aggressive_tuning_20251214_130419_22: $81.49
+     mean_revert/hold: agent=$-0.00, baseline_hold=$81.48
+  3. ep_aggressive_tuning_20251214_130419_6: $81.42
+     mean_revert/hold: agent=$-0.00, baseline_hold=$81.42
+  4. ep_aggressive_tuning_20251214_130419_79: $72.67
+     mean_revert/hold: agent=$-0.00, baseline_hold=$72.67
+  5. ep_aggressive_tuning_20251214_130419_15: $71.12
+     mean_revert/hold: agent=$-0.00, baseline_hold=$71.12
+  6. ep_aggressive_tuning_20251214_130419_63: $69.61
+     mean_revert/hold: agent=$-0.00, baseline_hold=$69.60
+  7. ep_aggressive_tuning_20251214_130419_7: $68.66
+     mean_revert/hold: agent=$-0.00, baseline_hold=$68.66
+  8. ep_aggressive_tuning_20251214_130419_54: $68.11
+     mean_revert/hold: agent=$-0.00, baseline_hold=$68.11
+  9. ep_aggressive_tuning_20251214_130419_74: $62.55
+     mean_revert/hold: agent=$-0.00, baseline_hold=$62.54
+  10. ep_aggressive_tuning_20251214_130419_64: $62.33
+     mean_revert/hold: agent=$-0.00, baseline_hold=$62.33
+
+
+📋 DECISION AUDIT TRAIL
+--------------------------------------------------------------------------------
+Missing decision_basis: 0
+
+Rule Frequency:
+  hold_oor_critical_low_fees: 86
+  hold_low_fees_ev_gate: 5
+  trend_up_winning_in_range_ev_gated: 3
+  mean_revert_stable_ev_gated: 3
+  first_episode: 1
+  cooldown_after_rebalance_low_fees: 1
+  jumpy_winning_in_range_ev_gated: 1
+
+Rule Performance:
+  trend_up_winning_in_range_ev_gated: mean_net=$-0.00, hit_rate=0.0%
+  cooldown_after_rebalance_low_fees: mean_net=$-0.00, hit_rate=0.0%
+  hold_low_fees_ev_gate: mean_net=$-0.00, hit_rate=0.0%
+  mean_revert_stable_ev_gated: mean_net=$-0.00, hit_rate=0.0%
+  jumpy_winning_in_range_ev_gated: mean_net=$-0.00, hit_rate=0.0%
+  hold_oor_critical_low_fees: mean_net=$-0.00, hit_rate=0.0%
+  first_episode: mean_net=$-4.00, hit_rate=0.0%

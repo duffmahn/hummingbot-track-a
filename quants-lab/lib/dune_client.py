@@ -37,7 +37,7 @@ class DuneClient:
         execute_url = f'{self.base_url}/query/{query_id}/execute'
         
         try:
-            # First attempt: Send provided parameters
+            # Send provided parameters
             response = requests.post(
                 execute_url,
                 headers=self.headers,
@@ -45,17 +45,16 @@ class DuneClient:
             )
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 400 and params:
-                print(f"[DuneClient] 400 Bad Request with params. Retrying without params (assuming hardcoded query)...")
-                # Retry with empty params
-                response = requests.post(
-                    execute_url,
-                    headers=self.headers,
-                    json={'query_parameters': {}}
-                )
-                response.raise_for_status()
-            else:
-                raise
+            if e.response.status_code == 400:
+                error_msg = f"Dune query {query_id} rejected parameters: {params}"
+                if params:
+                    error_msg += "\n\nLikely causes:"
+                    error_msg += "\n  1. Query parameters not defined in Dune UI"
+                    error_msg += "\n  2. Parameter names don't match (check {{parameter_name}} in SQL)"
+                    error_msg += "\n  3. Parameter types incorrect (number vs text)"
+                    error_msg += "\n\nFix: Update query in Dune UI to accept these parameters."
+                raise RuntimeError(error_msg) from e
+            raise
 
         execution_id = response.json()['execution_id']
         

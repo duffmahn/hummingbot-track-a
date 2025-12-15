@@ -38,7 +38,7 @@ class SmartCache:
         except Exception as e:
             logger.error(f"Failed to save cache to {self.cache_path}: {e}")
 
-    def get(self, key: str, fetch_func: Callable[[], Any], ttl_seconds: int = 3600, default: Any = None) -> Any:
+    def get(self, key: str, fetch_func: Optional[Callable[[], Any]] = None, ttl_seconds: int = 3600, default: Any = None) -> Any:
         """
         Get data from cache or fetch refresh.
         On fetch failure, returns stale data if available.
@@ -57,6 +57,14 @@ class SmartCache:
                 logger.info(f"Cache STALE for {key} (age: {age:.0f}s > TTL {ttl_seconds}s) – Attempting refresh...")
         else:
             logger.info(f"Cache MISS for {key} – Fetching...")
+
+        # If no fetch function provided, return stale data (best effort) or default
+        if fetch_func is None:
+            if entry:
+                logger.info(f"No fetch_func provided, returning STALE data for {key}")
+                return entry['data']
+            else:
+                return default
 
         # Fetch new data
         try:

@@ -1,0 +1,157 @@
+🔍 Analyzing run: aggressive_tuning_20251213_165047
+📁 Run directory: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251213_165047
+📁 Found 100 episodes in aggressive_tuning_20251213_165047
+✅ Successfully loaded 100 episodes
+
+✅ Saved JSON: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251213_165047/metrics_summary.json
+✅ Saved report: /home/a/.gemini/antigravity/scratch/data/runs/aggressive_tuning_20251213_165047/metrics_summary.txt
+
+================================================================================
+ABSOLUTE RETURN ANALYSIS - aggressive_tuning_20251213_165047
+================================================================================
+
+📊 OVERALL SUMMARY
+--------------------------------------------------------------------------------
+Episodes: 100
+Total Net PnL: $-229.02
+  = PnL $-117.02 - Gas $112.00
+Mean Net PnL/Episode: $-2.29
+Median Net PnL/Episode: $-3.66
+
+Actions: Hold=44, Rebalance=16, Widen=40
+Gas Saved vs Always-Rebalance: $88.00
+
+
+💼 BY ACTION
+--------------------------------------------------------------------------------
+
+HOLD (44 episodes):
+  Mean Net PnL: $-0.17
+  Hit Rate: 25.0%
+  Mean Gas: $0.00
+
+REBALANCE (16 episodes):
+  Mean Net PnL: $-4.12
+  Hit Rate: 0.0%
+  Mean Gas: $2.00
+
+WIDEN (40 episodes):
+  Mean Net PnL: $-3.89
+  Hit Rate: 0.0%
+  Mean Gas: $2.00
+
+
+🌍 BY REGIME × ACTION
+--------------------------------------------------------------------------------
+
+jumpy / hold (14 episodes):
+  Mean Net PnL: $-0.31
+  Hit Rate: 14.3%
+
+jumpy / rebalance (8 episodes):
+  Mean Net PnL: $-4.24
+  Hit Rate: 0.0%
+
+jumpy / widen (8 episodes):
+  Mean Net PnL: $-4.08
+  Hit Rate: 0.0%
+
+mean_revert / hold (17 episodes):
+  Mean Net PnL: $-0.02
+  Hit Rate: 47.1%
+
+mean_revert / rebalance (3 episodes):
+  Mean Net PnL: $-3.64
+  Hit Rate: 0.0%
+
+mean_revert / widen (24 episodes):
+  Mean Net PnL: $-3.75
+  Hit Rate: 0.0%
+
+trend_up / hold (13 episodes):
+  Mean Net PnL: $-0.22
+  Hit Rate: 7.7%
+
+trend_up / rebalance (5 episodes):
+  Mean Net PnL: $-4.21
+  Hit Rate: 0.0%
+
+trend_up / widen (8 episodes):
+  Mean Net PnL: $-4.14
+  Hit Rate: 0.0%
+
+
+🏆 BASELINE COMPARISON
+--------------------------------------------------------------------------------
+Best Overall: baseline_hold
+
+baseline_hold:
+  Total Net PnL: $-22836.88
+  Mean Net PnL: $-228.37
+
+baseline_medium:
+  Total Net PnL: $-75925.09
+  Mean Net PnL: $-759.25
+
+baseline_tight:
+  Total Net PnL: $-124060.00
+  Mean Net PnL: $-1240.60
+
+baseline_wide:
+  Total Net PnL: $-23144.88
+  Mean Net PnL: $-231.45
+
+
+💸 REGRET ANALYSIS
+--------------------------------------------------------------------------------
+Total Regret: $-22607.86
+Mean Regret/Episode: $-226.08
+
+Top 10 Regret Episodes:
+  1. ep_aggressive_tuning_20251213_165047_90: $2255.10
+     mean_revert/rebalance: agent=$-3.50, baseline_hold=$2251.60
+  2. ep_aggressive_tuning_20251213_165047_3: $2226.52
+     mean_revert/hold: agent=$-0.27, baseline_hold=$2226.25
+  3. ep_aggressive_tuning_20251213_165047_62: $1797.53
+     mean_revert/hold: agent=$-0.59, baseline_hold=$1796.94
+  4. ep_aggressive_tuning_20251213_165047_42: $1491.79
+     mean_revert/hold: agent=$-0.20, baseline_hold=$1491.59
+  5. ep_aggressive_tuning_20251213_165047_45: $1455.28
+     mean_revert/hold: agent=$0.03, baseline_hold=$1455.31
+  6. ep_aggressive_tuning_20251213_165047_18: $1251.64
+     mean_revert/hold: agent=$0.53, baseline_hold=$1252.17
+  7. ep_aggressive_tuning_20251213_165047_89: $1132.34
+     mean_revert/rebalance: agent=$-3.71, baseline_hold=$1128.63
+  8. ep_aggressive_tuning_20251213_165047_57: $933.85
+     jumpy/hold: agent=$-0.51, baseline_hold=$933.34
+  9. ep_aggressive_tuning_20251213_165047_44: $862.85
+     mean_revert/hold: agent=$0.26, baseline_hold=$863.11
+  10. ep_aggressive_tuning_20251213_165047_85: $824.79
+     mean_revert/hold: agent=$0.27, baseline_hold=$825.06
+
+
+📋 DECISION AUDIT TRAIL
+--------------------------------------------------------------------------------
+Missing decision_basis: 0
+
+Rule Frequency:
+  widen_oor_extreme: 40
+  mean_revert_stable: 17
+  jumpy_winning_in_range: 14
+  trend_up_winning_in_range: 13
+  jumpy_guardrail_failed: 6
+  trend_up_guardrail_failed: 4
+  loss_streak_breaker: 4
+  first_episode: 1
+  mean_revert_failed: 1
+
+Rule Performance:
+  mean_revert_stable: mean_net=$-0.02, hit_rate=47.1%
+  trend_up_winning_in_range: mean_net=$-0.22, hit_rate=7.7%
+  jumpy_winning_in_range: mean_net=$-0.31, hit_rate=14.3%
+  mean_revert_failed: mean_net=$-3.71, hit_rate=0.0%
+  widen_oor_extreme: mean_net=$-3.89, hit_rate=0.0%
+  loss_streak_breaker: mean_net=$-3.93, hit_rate=0.0%
+  trend_up_guardrail_failed: mean_net=$-4.19, hit_rate=0.0%
+  first_episode: mean_net=$-4.21, hit_rate=0.0%
+  jumpy_guardrail_failed: mean_net=$-4.25, hit_rate=0.0%

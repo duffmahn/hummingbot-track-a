@@ -16,7 +16,7 @@ import logging
 import datetime
 import hashlib
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 # Add quants-lab to path
 QUANTS_LAB_DIR = Path(__file__).parent.parent.parent / "quants-lab"
@@ -198,9 +198,35 @@ class AgentHarness:
             if result.timings_ms:
                 artifacts.write_timings(result.timings_ms)
             
-            # Compute and write reward
+            # Compute and write reward (always)
             reward = self._compute_reward(result)
             artifacts.write_reward(reward)
+            
+            # Always log rich completion event (success or fail)
+            pa = result.position_after or {}
+            best_baseline_pnl = None
+            if result.baselines and result.alpha_vs:
+                best_baseline = result.baselines.get(result.alpha_vs, {})
+                best_baseline_pnl = best_baseline.get("pnl_usd")
+            
+            artifacts.log_event("episode_complete", {
+                "episode_id": episode_id,
+                "run_id": ctx.run_id,
+                "status": result.status,
+                "exec_mode": result.exec_mode,
+                "pnl_usd": result.pnl_usd,
+                "fees_usd": result.fees_usd,
+                "gas_cost_usd": result.gas_cost_usd,
+                "out_of_range_pct": result.out_of_range_pct,
+                "rebalance_count": result.rebalance_count,
+                "reward_total": reward.total,
+                "reward_components": reward.components,
+                # ✅ DELIVERABLE 4: Action and alpha fields
+                "action_applied": pa.get("action_applied"),
+                "alpha_usd": result.alpha_usd,
+                "alpha_vs": result.alpha_vs,
+                "best_baseline_pnl": best_baseline_pnl,
+            })
             
             # Write failure if status is not success
             if result.status != "success":
@@ -208,19 +234,18 @@ class AgentHarness:
                     result.error or "Episode failed",
                     {
                         "status": result.status,
-                        "errors": result.errors
+                        "errors": result.errors,
+                        "pnl_usd": result.pnl_usd,
+                        "fees_usd": result.fees_usd,
+                        "gas_cost_usd": result.gas_cost_usd,
+                        "out_of_range_pct": result.out_of_range_pct,
+                        "rebalance_count": result.rebalance_count,
+                        "reward_total": reward.total,
+                        "reward_components": reward.components,
                     }
                 )
                 logger.warning(f"⚠️  Episode {episode_id} failed: {result.error}")
                 return False
-            
-            # Log episode completion
-            artifacts.log_event("episode_complete", {
-                "episode_id": episode_id,
-                "status": result.status,
-                "pnl_usd": result.pnl_usd,
-                "reward": reward.total
-            })
             
             logger.info(f"✅ Episode {episode_id} completed successfully")
             return True
@@ -259,30 +284,67 @@ class AgentHarness:
     
     def _compute_reward(self, result: EpisodeResult) -> RewardBreakdown:
         """
-        Compute reward from episode result.
-        Simple reward function for now.
+        Reward v4: alpha-first + light penalties (no double counting).
+        Alpha is the primary signal; PnL provides context.
         """
-        components = {}
+        components: Dict[str, float] = {}
         
-        # PnL component
-        components["pnl"] = result.pnl_usd
+        # ✅ DELIVERABLE 4: Alpha-first reward
+        if result.alpha_usd is not None:
+            # Primary signal: alpha vs best baseline
+            components["alpha"] = float(result.alpha_usd)
+            # Context: PnL at 20% weight
+            components["net_pnl_ctx"] = 0.2 * float(result.pnl_usd)
+        else:
+            # Fallback if no alpha available
+            components["net_pnl"] = float(result.pnl_usd)
         
-        # Fee component
-        components["fees"] = result.fees_usd
+        # --- Light orthogonal penalties ---
+        components["rebalance_penalty"] = -0.5 * float(result.rebalance_count or 0)
         
-        # Gas cost penalty
-        components["gas_penalty"] = -result.gas_cost_usd
-        
-        # Out of range penalty
         if result.out_of_range_pct is not None:
-            components["range_penalty"] = -result.out_of_range_pct * 10
+            components["oor_penalty"] = -0.01 * float(result.out_of_range_pct)
+        
+        if result.latency_ms is not None:
+            components["latency_penalty"] = -0.0005 * float(result.latency_ms)
+        
+        # --- Diagnostics / reconciliation (0 weight) ---
+        pa = result.position_after or {}
+        missed = pa.get("missed_fees_usd_proxy")
+        il = pa.get("il_penalty_usd_proxy")
+        fees_this_ep = pa.get("fees_this_episode_usd")
+        
+        if missed is not None and il is not None and fees_this_ep is not None:
+            # Reconstruct PnL from components
+            pnl_recon = (
+                float(fees_this_ep)
+                - float(result.gas_cost_usd)
+                - 0.5 * float(missed)
+                - float(il)
+            )
+            recon_err = float(result.pnl_usd) - pnl_recon
+            # Diagnostic only (0 weight)
+            components["pnl_recon_error"] = 0.0 * recon_err
+            
+            # ✅ Guardrail: warn if drift is non-trivial
+            if abs(recon_err) > 1e-6:
+                logger.warning(
+                    "⚠️ PnL reconciliation drift detected",
+                    extra={
+                        "episode_id": result.episode_id,
+                        "run_id": result.run_id,
+                        "pnl_usd": result.pnl_usd,
+                        "pnl_recon": pnl_recon,
+                        "pnl_recon_error": recon_err,
+                        "fees_this_episode_usd": fees_this_ep,
+                        "gas_cost_usd": result.gas_cost_usd,
+                        "missed_fees_usd_proxy": missed,
+                        "il_penalty_usd_proxy": il,
+                    },
+                )
         
         total = sum(components.values())
-        
-        return RewardBreakdown(
-            total=total,
-            components=components
-        )
+        return RewardBreakdown(total=float(total), components=components)
 
 if __name__ == "__main__":
     # Smoke test

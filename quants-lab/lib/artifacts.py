@@ -3,8 +3,10 @@ import json
 import fcntl
 from typing import Any, Optional, Dict
 from pydantic import BaseModel
+from pathlib import Path
 
 from .schemas import Proposal, EpisodeMetadata, EpisodeResult, RewardBreakdown
+from .path_utils import resolve_base_dir
 
 class EpisodeArtifacts:
     """
@@ -18,11 +20,18 @@ class EpisodeArtifacts:
     - failure.json
     """
     
-    def __init__(self, run_id: str, episode_id: str, base_dir: str = "scratch/data"):
+    def __init__(self, run_id: str, episode_id: str, base_dir: Optional[str] = None):
         self.run_id = run_id
         self.episode_id = episode_id
+        
+        # ✅ Use shared path resolution utility
+        if base_dir is None:
+            self.base_dir = resolve_base_dir()
+        else:
+            self.base_dir = Path(base_dir).expanduser().resolve()
+        
         # Structure: <base_dir>/runs/<run_id>/episodes/<episode_id>/
-        self.episode_dir = os.path.join(base_dir, "runs", run_id, "episodes", episode_id)
+        self.episode_dir = str(self.base_dir / "runs" / run_id / "episodes" / episode_id)
         
     def ensure_directories(self):
         """Creates the episode directory if it doesn't exist."""

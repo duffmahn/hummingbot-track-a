@@ -293,3 +293,69 @@ log "📁 Run directory: $RUN_DIR"
 # Generate metrics
 log "📊 Generating metrics..."
 "$VENV_PY" "$SCRIPT_DIR/quants-lab/scripts/build_run_metrics.py" --run-id "$RUN_ID" || log "⚠️  Metrics generation failed (non-fatal)"
+
+# Print ROI summary if metrics exist
+if [[ -f "$RUN_DIR/metrics_summary.json" ]]; then
+  log ""
+  log "📊 ROI SUMMARY"
+  "$VENV_PY" - "$RUN_DIR/metrics_summary.json" <<'PYEOF' | tee -a "$CAMPAIGN_LOG"
+import json
+import sys
+
+try:
+    metrics_path = sys.argv[1]
+    with open(metrics_path) as f:
+        m = json.load(f)
+    
+    if 'error' in m:
+        print(f"  Error: {m['error']}")
+        sys.exit(0)
+    
+    # Extract sections
+    cap = m.get('capital_assumptions', {})
+    dur = m.get('duration', {})
+    tot = m.get('totals', {})
+    roi = m.get('roi_metrics', {})
+    perf = m.get('performance', {})
+    
+    # Print summary
+    print(f"  Run: {m.get('run_id', 'unknown')} ({m.get('exec_mode', 'unknown')})")
+    print(f"  Starting Capital: ${cap.get('starting_capital_usd', 0):.2f} ({cap.get('capital_inference_method', 'unknown')})")
+    print(f"  Exposure: {dur.get('exposure_s', 0)/3600:.1f}h ({dur.get('exposure_method', 'unknown')})")
+    print(f"  Total PnL: ${tot.get('total_pnl_usd', 0):.2f} → ROI: {roi.get('roi', 0)*100:.2f}%")
+    print(f"  Fees ROI: {roi.get('fees_roi', 0)*100:.2f}% | Gas ROI: {roi.get('gas_roi', 0)*100:.2f}%")
+    print(f"  Fee Capture: {perf.get('capture_efficiency', 0)*100:.1f}% (${tot.get('total_fees_usd', 0):.2f}/${tot.get('total_fee_opportunity_usd', 0):.2f})")
+    print(f"  PnL/100k Vol: ${perf.get('pnl_per_100k_vol', 0):.2f}")
+    print(f"  OOR: {perf.get('mean_out_of_range_pct', 0):.1f}% avg, {perf.get('max_out_of_range_pct', 0):.1f}% max")
+    print(f"  Latency: {perf.get('avg_latency_ms', 0):.1f}ms avg, {perf.get('p95_latency_ms', 0):.1f}ms p95")
+    
+    # ✅ DELIVERABLE 4: Alpha, hold, and baseline policy metrics
+    baseline_wins = perf.get('baseline_policy_win_counts', {})
+    baseline_str = " | ".join([f"{k}={v}" for k, v in sorted(baseline_wins.items(), key=lambda x: x[1], reverse=True)[:4]])
+    print(f"  Alpha Total: ${perf.get('total_alpha_usd', 0):.2f} | Win-rate: {perf.get('alpha_win_rate', 0)*100:.1f}% | Hold: {perf.get('hold_episodes', 0)}/{dur.get('episodes_count', 0)}")
+    if baseline_str:
+        print(f"  Best Baseline wins: {baseline_str}")
+    
+    # ✅ DELIVERABLE 4: Alpha efficiency metrics
+    aph = perf.get("alpha_per_hour_usd")
+    apr = perf.get("alpha_per_rebalance_episode_usd")
+    if aph is not None:
+        print(f"  Alpha/hr: ${aph:.3f}")
+    if apr is not None:
+        print(f"  Alpha per rebalance: ${apr:.3f}")
+    
+    # APR (if available)
+    apr_pnl = roi.get('apr_pnl')
+    apr_fees = roi.get('apr_fees')
+    if apr_pnl is not None and apr_fees is not None:
+        apr_note = roi.get('apr_note', '')
+        print(f"  APR (proxy): {apr_pnl*100:.1f}% pnl | {apr_fees*100:.1f}% fees ({apr_note})")
+    
+except Exception as e:
+    print(f"  Failed to print summary: {e}")
+    import traceback
+    traceback.print_exc()
+PYEOF
+fi
+
+

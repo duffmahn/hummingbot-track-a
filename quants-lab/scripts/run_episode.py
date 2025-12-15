@@ -3,13 +3,9 @@ import os
 import argparse
 from pathlib import Path
 
-# Add quants-lab to path
-QUANTS_LAB_DIR = Path(__file__).parent.parent / "quants-lab"
-sys.path.append(str(QUANTS_LAB_DIR))
-
-# Add hummingbot/scripts to path
-HUMMINGBOT_SCRIPTS = Path(__file__).parent.parent / "hummingbot" / "scripts"
-sys.path.append(str(HUMMINGBOT_SCRIPTS))
+# Add parent directory (quants-lab) to path
+QUANTS_LAB_DIR = Path(__file__).parent.parent
+sys.path.insert(0, str(QUANTS_LAB_DIR))
 
 def main():
     parser = argparse.ArgumentParser(description="Run a single episode")
